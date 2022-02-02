@@ -58,7 +58,8 @@ void DateTimeSet(void)
  * struct with ui32Year, ui32Month, ui32Day.
  *
  * It asks the user to input data in the following format "DD-MM-YY", and then waits for the 'A' button to be pressed which is the
- * confirmation key, if the user has done a mistake it can press the 'B' button to repeat from the beginning.
+ * confirmation key, if the user has done a mistake it can press the 'B' button to repeat from the beginning. Only valid dates will be
+ * accepted and if any letter excluding A or B is pressed the function repeat from the beginning to handle that error.
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Get_Date(uint32_t *ui32Year, uint32_t *ui32Month, uint32_t *ui32Day){
@@ -151,7 +152,8 @@ void Get_Date(uint32_t *ui32Year, uint32_t *ui32Month, uint32_t *ui32Day){
  * strut with ui32Hour, ui32Min, ui32Sec.
  *
  * It asks the user to input data in the following format "hh:mm:ss", and then waits for the 'A' button to be pressed which is the
- * confirmation key, if the user has done a mistake it can press the 'B' button to repeat from the beginning.
+ * confirmation key, if the user has done a mistake it can press the 'B' button to repeat from the beginning. Only valid times will be
+ * accepted and if any letter excluding A or B is pressed the function repeat from the beginning to handle that error.
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Get_Time(uint32_t *ui32Hour, uint32_t *ui32Min, uint32_t *ui32Sec){

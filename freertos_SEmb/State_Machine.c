@@ -26,7 +26,7 @@
  *                but the count down and the trigger of the buzzer is done in Active State.
  *
  * The Beacon State:(state 2) It's the State that handles the PIN confirmation after the alarm has been or will be triggered. If the PIN is
- *                correct, this state will stop the buzzer and disarm the alarm. The alarm will stay disarmed until the user arm
+ *                correct, this state will stop the buzzer and disarm the alarm. The alarm will stay disarmed until the user arm's
  *                it in the Active State by pressing 'C'.
  *
  */
@@ -34,6 +34,12 @@
 
 #include "System.h" // This header file has everything for this project to work, better explained in System.h file.
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*int StateMachineTaskInit(void);
+ *
+ * This function was made to tell the program if the task was created successfully or not.
+ */
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int StateMachineTaskInit(void){
     if(xTaskCreate(State_Machine, (const portCHAR *)"State_Machine", 258, NULL, tskIDLE_PRIORITY + 2, NULL) != pdTRUE){
         return(1);
@@ -42,6 +48,12 @@ int StateMachineTaskInit(void){
     return(0);
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*void KeyboardTask(void *pvParameters);
+ *
+ * This function is the task responsible for the State Machine, it will never exit until the power is disconnected.
+ */
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void State_Machine(void *pvParameters){
 
     char ckey;
@@ -74,19 +86,15 @@ void State_Machine(void *pvParameters){
                 break;
 
             case 1:// Active State , Active State will be a task in the future
-
                 Active_state();
 
                 break;
 
             case 2:// Beacon State, this state will handle to disarm of the Buzzer and check if the pin is correct
 
-                if( xSemaphoreTake( g_pLCDSemaphore, portMAX_DELAY ) == pdTRUE )
-                {
-                    Lcd_Write_String("Press to input PIN");
-                    SysCtlDelay(40000);
-                    xSemaphoreGive(g_pLCDSemaphore);
-                }
+                Lcd_Write_String("Press to input PIN"); // to show the user that a key has to be press to disarm the al
+                SysCtlDelay(100000);                    //if not the countdown will be displayed
+                xSemaphoreGive(g_pLCDSemaphore);
                 iexit = 0;
                 while(alarm_armed == TRUE) // checking if PIN is correct, for more details go to Active_State.c
                 {
@@ -108,7 +116,7 @@ void State_Machine(void *pvParameters){
                 SysCtlDelay(40000);
                 alarm_armed = FALSE;// This line is a flag for the Unblocking of the Active State
                 istate = 1;  // Returning to Active State when the task are separated this line should be deleted
-                if(ialarm_fired == 1)
+                if(ialarm_fired == 1) // if the alarm was disarmed in time it will not release the semaphore.
                 {
                     xSemaphoreGive(g_pAlarmTriggerSemaphore);
                 }

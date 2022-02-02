@@ -239,7 +239,7 @@ int check_PIN (void){
  * trigger_distance, state from main.c.
  *
  * There is 5 actions that the user can take:
- *      F-> return to Configuration state.
+ *      F-> return to Configuration state. The user to return to this state must first have the alarm disarmed and input the PIN.
  *      E-> check date and time, we use the Tiva C Hibernation module which works with RTC to get the actual date and time
  *      after the time by seconds it was inputed.
  *      D-> check date and time of last trigger of the alarm, we use an array to store that data and update in case of a

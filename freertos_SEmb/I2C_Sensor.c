@@ -3,6 +3,12 @@
  *
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Project for the subject SEmb, made by Diogo Rodrigues nº94240, Daniel Proanho nº101229, and Miguel Fernandes nº93790
+ *
+ * This file contains all the code concerning the sonar handling and communication.
+ */
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "System.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -11,12 +17,12 @@
  * This function was made to keep the Active_state() a little cleaner and maybe this function can be used in another setting.
  *
  * It was made to handle the count down in case the alarm was triggered to give time to the user to input the correct PIN to disarm
- * the alarm. In case this is not done in time the Buzzer will start ringing and it will stay locked in line 49 until the alarm is disarm
+ * the alarm. In case this is not done in time the Buzzer will start ringing continually and the program will stay locked until the alarm is disarm
  * in Beacon state (state 2) also blocking the access to the other functionalities of Active state.
  *
  * For the count down we use the RTC, we give a fixed value to n2  and update n1 with the time that has passed since the
- * end of line 36, if we subtract 15 with n1 - n2 we will have a count down of 15 seconds, n3 is there so that the display only shows
- * when n1 changes value and for the n1-n2 subtraction.
+ * end of line 36, if we subtract itimeout with n1 - n2 we will have a count down of itimeout seconds, n3 is there so that the display only shows
+ * when n1 changes value and for the n1-n2 subtraction. Each second there will be a beep to show that time is passing.
  */
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void alarm_Triggered(void){
@@ -37,7 +43,7 @@ void alarm_Triggered(void){
         n1 = HibernateRTCGet();
         if(n3 != n1){
             pwm0_start(1000, 50);
-            if( xSemaphoreTake( g_pLCDSemaphore, ( TickType_t ) 10 ) == pdTRUE )
+            if( xSemaphoreTake( g_pLCDSemaphore, ( TickType_t ) 10 ) == pdTRUE ) // if the user is not inputing the PIN display countdown
             {
             n3 = n1 - n2;
             Lcd_Clear();
@@ -50,10 +56,10 @@ void alarm_Triggered(void){
             i++;
         }
     }
-    if(alarm_armed == TRUE){
+    if(alarm_armed == TRUE){ // if alarm still not disarmed
         Lcd_Clear();
         Lcd_Write_Integer(0);
-        ialarm_fired = 1;
+        ialarm_fired = 1;   //flag that says to the State Machine task that the alarm was not disarmed in time
         pwm0_start(1000, 80);
         xSemaphoreTake(g_pAlarmTriggerSemaphore, portMAX_DELAY);
         Lcd_Write_String("ALARM DISARMED2!");
@@ -62,6 +68,12 @@ void alarm_Triggered(void){
     return;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*int SonarTaskInit(void);
+ *
+ * This function was made to tell the program if the task was created successfully or not.
+ */
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int SonarTaskInit(void){
     if(xTaskCreate(SonarTask, (const portCHAR *)"Sonar",
                    128, NULL, tskIDLE_PRIORITY + 1, NULL) != pdTRUE)
@@ -71,6 +83,13 @@ int SonarTaskInit(void){
     // Success.
     return(0);
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*void SonarTask(void *pvParameters);
+ *
+ * This function is the task responsible for the sonar, it will never exit until the power is disconnected
+ */
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void SonarTask(void *pvParameters){
     portTickType ui16LastTime;
     uint32_t ui32SwitchDelay = 25;
