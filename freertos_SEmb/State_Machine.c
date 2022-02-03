@@ -90,12 +90,12 @@ void State_Machine(void *pvParameters){
 
                 break;
 
-            case 2:// Beacon State, this state will handle to disarm of the Buzzer and check if the pin is correct
+            case 2:// Beacon State, this state will handle to disarm of the Buzzer and check if the pin is correct.
 
                 Lcd_Write_String("Press to input PIN"); // to show the user that a key has to be press to disarm the al
                 SysCtlDelay(100000);                    //if not the countdown will be displayed
                 xSemaphoreGive(g_pLCDSemaphore);
-                iexit = 0;
+                iexit = 0;                      // to reset iexit.
                 while(alarm_armed == TRUE) // checking if PIN is correct, for more details go to Active_State.c
                 {
                     if(xQueueReceive(g_pKEYBOARDQueue, &ckey, ( TickType_t ) 10) == pdPASS)
